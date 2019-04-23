@@ -50,7 +50,7 @@ func (c *Compression) MarshalText() ([]byte, error) {
 	return []byte(compressionMapReversed[c.CompAlgo]), nil
 }
 
-// Value return time.Duration value
+// Value return
 func (c *Compression) Value() CompAlgo {
 	return c.CompAlgo
 }

@@ -119,33 +119,29 @@ func (w *Writer) worker(ctx context.Context) {
 	var outBuf *bufio.Writer
 	var fn string // current filename
 
-	cwrClose := func() {
-		if cwr != nil {
-			if err := cwr.Close(); err != nil {
-				w.logger.Error("CompWriter close failed", zap.Error(err))
+	close := func() {
+		if out != nil {
+			outBuf.Flush()
+
+			if cwr != nil {
+				if err := cwr.Close(); err != nil {
+					w.logger.Error("CompWriter close failed", zap.Error(err))
+				}
 			}
+
+			out.Close()
 		}
 	}
 
-	defer func() {
-		if out != nil {
-			outBuf.Flush()
-			cwrClose()
-			out.Close()
-		}
-	}()
+	defer close()
 
 	// close old file, open new
 	rotate := func() {
-		if out != nil {
-			outBuf.Flush()
-			cwrClose()
-			out.Close()
+		close()
 
-			out = nil
-			cwr = nil
-			outBuf = nil
-		}
+		out = nil
+		cwr = nil
+		outBuf = nil
 
 		var err error
 
