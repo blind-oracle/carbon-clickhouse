@@ -2,6 +2,7 @@ package uploader
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"fmt"
 	"io"
 	"time"
@@ -64,17 +65,19 @@ LineLoop:
 			continue
 		}
 
-		if u.existsCache.Exists(unsafeString(name)) {
+		h := sha1.Sum(name)
+		key := unsafeString(h[:])
+
+		if u.existsCache.Exists(key) {
 			continue LineLoop
 		}
 
-		if newSeries[unsafeString(name)] {
+		if newSeries[key] {
 			continue LineLoop
 		}
 
+		newSeries[key] = true
 		level = pathLevel(name)
-
-		newSeries[string(name)] = true
 
 		if err = writePathLevel(name, level); err != nil {
 			return nil, err

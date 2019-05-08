@@ -35,8 +35,12 @@ func (r *Reader) Timestamp() uint32 {
 	return binary.LittleEndian.Uint32(r.line[r.size-10 : r.size-6])
 }
 
+func (r *Reader) DaysBytes() []byte {
+	return r.line[r.size-6 : r.size-4]
+}
+
 func (r *Reader) Days() uint16 {
-	return binary.LittleEndian.Uint16(r.line[r.size-6 : r.size-4])
+	return binary.LittleEndian.Uint16(r.DaysBytes())
 }
 
 func (r *Reader) DaysString() string {

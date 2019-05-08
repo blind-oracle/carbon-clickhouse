@@ -2,9 +2,10 @@ package uploader
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"time"
+
+	"crypto/sha1"
 
 	"github.com/lomik/carbon-clickhouse/helper/RowBinary"
 )
@@ -53,7 +54,10 @@ LineLoop:
 			continue
 		}
 
-		key := fmt.Sprintf("%d:%s", reader.Days(), unsafeString(name))
+		h := sha1.New()
+		h.Write(reader.DaysBytes())
+		h.Write(name)
+		key := unsafeString(h.Sum(nil))
 
 		if u.existsCache.Exists(key) {
 			continue LineLoop
@@ -63,11 +67,11 @@ LineLoop:
 			continue LineLoop
 		}
 
+		newSeries[key] = true
+
 		level = pathLevel(name)
 
 		wb.Reset()
-
-		newSeries[key] = true
 		wb.WriteUint16(reader.Days())
 		wb.WriteUint32(uint32(level))
 		wb.WriteBytes(name)

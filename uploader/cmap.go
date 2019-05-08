@@ -5,15 +5,16 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/cespare/xxhash"
 )
 
-var shardCount = 1024
+const shardCount = 1024
 
-// A "thread" safe map of type string:Anything.
-// To avoid lock bottlenecks this map is dived to several (shardCount) map shards.
+// A "thread" safe map of type string:int64
+// To avoid lock bottlenecks this map is divided to several (shardCount) map shards.
 type CMap []*CMapShard
 
-// A "thread" safe string to anything map.
 type CMapShard struct {
 	sync.RWMutex // Read Write mutex, guards access to internal map.
 	items        map[string]int64
@@ -65,8 +66,7 @@ func (m CMap) Clear() int {
 
 // Returns shard under given key
 func (m CMap) GetShard(key string) *CMapShard {
-	// @TODO: remove type casts
-	return m[uint(fnv32(key))%uint(shardCount)]
+	return m[xxhash.Sum64String(key)%shardCount]
 }
 
 // Retrieves an element from map under given key.

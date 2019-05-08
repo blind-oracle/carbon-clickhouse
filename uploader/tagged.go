@@ -2,6 +2,7 @@ package uploader
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"fmt"
 	"io"
 	"net/url"
@@ -58,7 +59,10 @@ LineLoop:
 			continue
 		}
 
-		key := fmt.Sprintf("%d:%s", reader.Days(), unsafeString(name))
+		h := sha1.New()
+		h.Write(reader.DaysBytes())
+		h.Write(name)
+		key := unsafeString(h.Sum(nil))
 
 		if u.existsCache.Exists(key) {
 			continue LineLoop
@@ -68,12 +72,12 @@ LineLoop:
 			continue LineLoop
 		}
 
+		newTagged[key] = true
+
 		m, err := url.Parse(unsafeString(name))
 		if err != nil {
 			continue
 		}
-
-		newTagged[key] = true
 
 		wb.Reset()
 		tagsBuf.Reset()
