@@ -2,7 +2,6 @@ package uploader
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"fmt"
 	"io"
 	"net/url"
@@ -59,12 +58,17 @@ LineLoop:
 			continue
 		}
 
-		h := sha1.New()
-		h.Write(reader.DaysBytes())
-		h.Write(name)
-		key := unsafeString(h.Sum(nil))
+		key := unsafeString(reader.DaysBytes()) + unsafeString(name)
 
-		if u.existsCache.Exists(key) {
+		// if u.bloom.Test([]byte(key)) {
+		// 	continue LineLoop
+		// }
+
+		// if u.existsCache.Exists(key) {
+		// 	continue LineLoop
+		// }
+
+		if _, ok := u.tree.Get(key); ok {
 			continue LineLoop
 		}
 

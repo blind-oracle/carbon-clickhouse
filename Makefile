@@ -18,7 +18,8 @@ gox-build:
 	gox -os="linux" -arch="amd64" -arch="386" -output="out/$(NAME)-{{.OS}}-{{.Arch}}"  github.com/lomik/$(NAME)
 	ls -la out/
 	mkdir -p out/root/etc/$(NAME)/
-	./out/$(NAME)-linux-amd64 -config-print-default > out/root/etc/$(NAME)/$(NAME).conf
+	touch out/root/etc/$(NAME)/$(NAME).conf
+	#./out/$(NAME)-linux-amd64 -config-print-default > out/root/etc/$(NAME)/$(NAME).conf
 
 fpm-deb:
 	make fpm-build-deb ARCH=amd64

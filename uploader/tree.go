@@ -2,7 +2,6 @@ package uploader
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"fmt"
 	"io"
 	"time"
@@ -65,10 +64,13 @@ LineLoop:
 			continue
 		}
 
-		h := sha1.Sum(name)
-		key := unsafeString(h[:])
+		key := unsafeString(name)
 
-		if u.existsCache.Exists(key) {
+		// if u.bloom.Test(name) {
+		// 	continue LineLoop
+		// }
+
+		if _, ok := u.tree.Get(key); ok {
 			continue LineLoop
 		}
 

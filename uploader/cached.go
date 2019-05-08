@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"io"
 	"sync/atomic"
-	"time"
 
+	"github.com/armon/go-radix"
+	boom "github.com/tylertreat/BoomFilters"
 	"go.uber.org/zap"
 )
 
@@ -17,15 +18,19 @@ type DebugCacheDumper interface {
 
 type cached struct {
 	*Base
-	existsCache CMap // store known keys and don't load it to clickhouse tree
-	parser      func(filename string, out io.Writer) (map[string]bool, error)
-	expired     uint32 // atomic counter
+	//existsCache CMap // store known keys and don't load it to clickhouse tree
+	bloom   *boom.InverseBloomFilter
+	tree    *radix.Tree
+	parser  func(filename string, out io.Writer) (map[string]bool, error)
+	expired uint32 // atomic counter
 }
 
 func newCached(base *Base) *cached {
 	u := &cached{Base: base}
 	u.Base.handler = u.upload
-	u.existsCache = NewCMap()
+	//u.existsCache = NewCMap()
+	//u.bloom = boom.NewInverseBloomFilter(1000000)
+	u.tree = radix.New()
 	u.query = fmt.Sprintf("%s (Date, Level, Path, Version)", u.config.TableName)
 	return u
 }
@@ -33,7 +38,7 @@ func newCached(base *Base) *cached {
 func (u *cached) Stat(send func(metric string, value float64)) {
 	u.Base.Stat(send)
 
-	send("cacheSize", float64(u.existsCache.Count()))
+	//send("cacheSize", float64(u.existsCache.Count()))
 
 	expired := atomic.LoadUint32(&u.expired)
 	atomic.AddUint32(&u.expired, -expired)
@@ -46,23 +51,23 @@ func (u *cached) Start() error {
 		return err
 	}
 
-	if u.config.CacheTTL.Value() != 0 {
-		u.Go(func(ctx context.Context) {
-			u.existsCache.ExpireWorker(ctx, u.config.CacheTTL.Value(), &u.expired)
-		})
-	}
+	// if u.config.CacheTTL.Value() != 0 {
+	// 	u.Go(func(ctx context.Context) {
+	// 		u.existsCache.ExpireWorker(ctx, u.config.CacheTTL.Value(), &u.expired)
+	// 	})
+	// }
 
 	return nil
 }
 
 func (u *cached) Reset() {
-	u.existsCache.Clear()
+	//u.existsCache.Clear()
 }
 
 func (u *cached) upload(ctx context.Context, logger *zap.Logger, filename string) error {
 	pipeReader, pipeWriter := io.Pipe()
 	writer := bufio.NewWriter(pipeWriter)
-	startTime := time.Now()
+	// startTime := time.Now()
 
 	uploadResult := make(chan error, 1)
 
@@ -78,6 +83,7 @@ func (u *cached) upload(ctx context.Context, logger *zap.Logger, filename string
 	})
 
 	newSeries, err := u.parser(filename, writer)
+	//_, err := u.parser(filename, writer)
 	if err == nil {
 		err = writer.Flush()
 	}
@@ -101,7 +107,11 @@ func (u *cached) upload(ctx context.Context, logger *zap.Logger, filename string
 	}
 
 	// commit new series
-	u.existsCache.Merge(newSeries, startTime.Unix())
+	//u.existsCache.Merge(newSeries, startTime.Unix())
+
+	for k := range newSeries {
+		u.tree.Insert(k, 1)
+	}
 
 	return nil
 }

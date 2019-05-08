@@ -10,6 +10,22 @@
   version = "v0.3.0"
 
 [[projects]]
+  digest = "1:c47f4964978e211c6e566596ec6246c329912ea92e9bb99c00798bb4564c5b09"
+  name = "github.com/armon/go-radix"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1a2de0c21c94309923825da3df33a4381872c795"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:998cf998358a303ac2430c386ba3fd3398477d6013153d3c6e11432765cc9ae6"
+  name = "github.com/cespare/xxhash"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3b82fb7d186719faeedd0c2864f868c74fbf79a1"
+  version = "v2.0.0"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -114,6 +130,14 @@
   pruneopts = "UT"
   revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
   version = "v1.2.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9a6dfa905b564401d57c87bcf9ea1cd26539431ec2d8db46d3a332ba93ca6de5"
+  name = "github.com/tylertreat/BoomFilters"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "611b3dbe80e85df3a0a10a43997d4d5784e86245"
 
 [[projects]]
   digest = "1:9d5cf6f23377cc24f00ba9a7b0c83fe070171c094e42eece262c6252a392ec33"
@@ -231,6 +255,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/BurntSushi/toml",
+    "github.com/armon/go-radix",
+    "github.com/cespare/xxhash",
     "github.com/gogo/protobuf/gogoproto",
     "github.com/gogo/protobuf/proto",
     "github.com/golang/protobuf/ptypes/empty",
@@ -240,6 +266,7 @@
     "github.com/lomik/zapwriter",
     "github.com/pierrec/lz4",
     "github.com/stretchr/testify/assert",
+    "github.com/tylertreat/BoomFilters",
     "go.uber.org/zap",
     "golang.org/x/net/context",
     "google.golang.org/grpc",
