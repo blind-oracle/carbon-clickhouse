@@ -60,7 +60,7 @@ LineLoop:
 
 		key := fmt.Sprintf("%d:%s", reader.Days(), unsafeString(name))
 
-		if u.existsCache.Exists(key) {
+		if cache.Exists(key, u.id) {
 			continue LineLoop
 		}
 

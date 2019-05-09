@@ -64,11 +64,13 @@ LineLoop:
 			continue
 		}
 
-		if u.existsCache.Exists(unsafeString(name)) {
+		key := unsafeString(name)
+
+		if cache.Exists(key, u.id) {
 			continue LineLoop
 		}
 
-		if newSeries[unsafeString(name)] {
+		if newSeries[key] {
 			continue LineLoop
 		}
 

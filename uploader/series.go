@@ -2,7 +2,6 @@ package uploader
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"time"
 
@@ -53,9 +52,9 @@ LineLoop:
 			continue
 		}
 
-		key := fmt.Sprintf("%d:%s", reader.Days(), unsafeString(name))
+		key := unsafeString(reader.DaysBytes()) + unsafeString(name)
 
-		if u.existsCache.Exists(key) {
+		if cache.Exists(key, u.id) {
 			continue LineLoop
 		}
 
